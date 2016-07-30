@@ -1,29 +1,57 @@
-function setup() {
-    //lets require/import the mongodb native drivers.
-    const mongodb = require('mongodb');
+function insert(document, next) {
+    const mongo = require('mongodb').MongoClient;
     
-    //We need to work with "MongoClient" interface in order to connect to a mongodb server.
-    const MongoClient = mongodb.MongoClient;
-    
-    // Connection URL. This is where your mongodb server is running.
-    
-    //(Focus on This Variable)
-    const url = process.env.MONGOLAB_URI;      
-    //(Focus on This Variable)
-    
-    // Use connect method to connect to the Server
-      MongoClient.connect(url, function (err, db) {
-      if (err) {
-        console.log('Unable to connect to the mongoDB server. Error:', err);
-      } else {
-        console.log('Connection established to', url);
-    
-        // do some work here with the database.
-    
-        //Close connection
-        db.close();
-      }
+    mongo.connect(process.env.MONGOLAB_URI, function (err, db) {
+        if (err)
+            console.log('Unable to connect to the mongoDB server. Error:', err);
+        else
+        {
+            db.collection('shortURLs').insert(document, function(err, data) {
+                db.close();
+                next(err, data);
+            });
+        }
     });
 }
 
-module.exports.setup = setup;
+function count(next) {
+    const mongo = require('mongodb').MongoClient;
+    
+    mongo.connect(process.env.MONGOLAB_URI, function (err, db) {
+        if (err)
+            console.log('Unable to connect to the mongoDB server. Error:', err);
+        else
+        {
+            db.collection('shortURLs').count().then(function(result) {
+                db.close();
+                next(null, result);
+                
+            }, function(err) {
+                db.close();
+                next(err, null);
+            });
+        }
+        // next(err, null);
+    });
+}
+
+function find(key, next) {
+    const mongo = require('mongodb').MongoClient;
+    
+    mongo.connect(process.env.MONGOLAB_URI, function (err, db) {
+        if (err)
+            console.log('Unable to connect to the mongoDB server. Error:', err);
+        else
+        {
+            const c = db.collection('shortURLs').find(key).toArray(function(err, documents) {
+                db.close();
+                next(err, documents);
+            });
+        }
+        // next(err, null);
+    });
+}
+
+module.exports.insert = insert;
+module.exports.count = count;
+module.exports.find = find;
