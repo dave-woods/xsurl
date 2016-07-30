@@ -16,15 +16,17 @@ app.get('/n/*', function(req, res) {
         mdb.find({originalURL: original}, function(err, results) {
             if (err) throw err;
             if (results.length > 0)
-                res.json(results[0]);
+            {
+                const xsurl = req.protocol + '://' + req.get('host') + '/' + results[0].urlKey;
+                res.json({original_url: original, short_url: xsurl});
+            }
             else
             {
                 mdb.count(function(err, result) {
                     if (err) throw err;
                     const urlID = result + 1;
                     const xsurl = req.protocol + '://' + req.get('host') + '/' + urlID;
-                	const resObj = {original_url: original, short_url: xsurl};
-                	res.json(resObj);
+                	res.json({original_url: original, short_url: xsurl});
                     mdb.insert({urlKey: urlID, originalURL: original}, function(err, data) {
                         if (err) throw err;
                         console.log(JSON.stringify(data));
