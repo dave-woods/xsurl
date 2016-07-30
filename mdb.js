@@ -1,6 +1,5 @@
 function insert(document, next) {
     const mongo = require('mongodb').MongoClient;
-    
     mongo.connect(process.env.MONGOLAB_URI, function (err, db) {
         if (err)
             console.log('Unable to connect to the mongoDB server. Error:', err);
@@ -16,7 +15,6 @@ function insert(document, next) {
 
 function count(next) {
     const mongo = require('mongodb').MongoClient;
-    
     mongo.connect(process.env.MONGOLAB_URI, function (err, db) {
         if (err)
             console.log('Unable to connect to the mongoDB server. Error:', err);
@@ -31,27 +29,26 @@ function count(next) {
                 next(err, null);
             });
         }
-        // next(err, null);
     });
 }
 
 function find(key, next) {
     const mongo = require('mongodb').MongoClient;
-    
     mongo.connect(process.env.MONGOLAB_URI, function (err, db) {
         if (err)
             console.log('Unable to connect to the mongoDB server. Error:', err);
         else
         {
-            const c = db.collection('shortURLs').find(key).toArray(function(err, documents) {
+            db.collection('shortURLs').find(key).toArray(function(err, documents) {
                 db.close();
                 next(err, documents);
             });
         }
-        // next(err, null);
     });
 }
 
-module.exports.insert = insert;
-module.exports.count = count;
-module.exports.find = find;
+module.exports = {
+    insert: insert,
+    count: count,
+    find: find
+};
